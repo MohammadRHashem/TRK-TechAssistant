@@ -1,6 +1,8 @@
+import json
 from prompts import prompt_2
 import google.generativeai as genai
 from pdf2image import convert_from_path
+
 
 vision_model = genai.GenerativeModel(model_name="models/gemini-2.0-flash")
 genai.configure(api_key="AIzaSyCxHZzWgfpgT91e-ReTrqioroVenes4Ato")
@@ -17,6 +19,11 @@ def pdf_to_images(pdf_path, output_folder, dpi=300):
 def clean_text(response):
     response = response.replace("`", "")
     response = response.replace("json", "")
+    response_dict = json.loads(response)
+    response_dict["transaction_id"] = response_dict.get("transaction_id", "").replace(
+        "O", "0"
+    )
+    response = json.dumps(response_dict, indent=2)
     return response.strip()
 
 
@@ -52,5 +59,5 @@ def gemini_pdf_ocr(pdf_data):
         return response.text
 
     except Exception as e:
-        # print("Error in gemini_pdf_ocr:", e)
+        print("Error in gemini_pdf_ocr:", e)
         return None
